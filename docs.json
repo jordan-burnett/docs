@@ -1,4 +1,5 @@
 {
+  "$schema": "https://mintlify.com/docs.json",
   "name": "Graphy Core SDK",
   "theme": "mint",
   "logo": {
@@ -9,82 +10,29 @@
   "colors": {
     "primary": "#0369a1",
     "light": "#38bdf8",
-    "dark": "#1e40af",
-    "anchors": {
-      "from": "#0369a1",
-      "to": "#1e40af"
-    }
+    "dark": "#1e40af"
   },
-  "topbarLinks": [
-    {
-      "name": "Support",
-      "url": "mailto:support@graphy.com"
-    }
-  ],
-  "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://app.graphy.com"
-  },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
-  "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open",
-      "url": "https://docs.graphy.com"
-    },
-    {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://join.slack.com/t/graphy-community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://graphy.com/blog"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Get Started",
-      "pages": ["quickstart"]
-    },
-    {
-      "group": "Core Components",
-      "pages": ["visualisation-provider", "visualisation-controller"]
-    },
-    {
-      "group": "Schemas & Types",
-      "pages": [
-        "schemas/raw-data",
-        "schemas/dataset-config",
-        "schemas/visualisation-config",
-        "schemas/appearance-config",
-        "schemas/number-format"
-      ]
-    }
-  ],
-  "footerSocials": {
-    "twitter": "https://twitter.com/graphyapp",
-    "github": "https://github.com/graphy",
-    "linkedin": "https://www.linkedin.com/company/graphy"
-  },
-  "analytics": {
-    "gtm": {
-      "tagId": "GTM-XXXXXXX"
-    }
-  },
-  "seo": {
-    "indexHiddenPages": false
-  },
-  "redirects": [
-    {
-      "source": "/docs",
-      "destination": "/quickstart"
-    }
-  ]
+
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["quickstart"]
+      },
+      {
+        "group": "Core Components",
+        "pages": ["visualisation-provider", "visualisation-controller"]
+      },
+      {
+        "group": "Schemas & Types",
+        "pages": [
+          "schemas/raw-data",
+          "schemas/dataset-config",
+          "schemas/visualisation-config",
+          "schemas/appearance-config",
+          "schemas/number-format"
+        ]
+      }
+    ]
+  }
 }
