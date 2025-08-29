@@ -1,0 +1,575 @@
+---
+title: "NumberFormat"
+description: "Configuration object that controls how numeric values are formatted and displayed throughout charts including decimal places, abbreviations, and localization."
+---
+
+# NumberFormat
+
+`NumberFormat` controls how numeric values are displayed throughout your charts, including axis labels, data labels, tooltips, and legends. It provides options for decimal precision, number abbreviation, and formatting consistency.
+
+## Type Definition
+
+```typescript
+interface NumberFormat {
+  decimalPlaces: DecimalPlaces;
+  abbreviation: NumberAbbreviation;
+}
+
+type DecimalPlaces = 'auto' | number; // 0-5 when number
+type NumberAbbreviation = 'none' | 'auto' | 'k' | 'm' | 'b';
+```
+
+## Properties
+
+### `decimalPlaces`
+- **Type**: `DecimalPlaces`
+- **Required**: Yes
+- **Description**: Number of decimal places to display for numeric values
+
+```typescript
+type DecimalPlaces = 'auto' | 0 | 1 | 2 | 3 | 4 | 5;
+```
+
+| Value | Description | Example Output |
+|-------|-------------|----------------|
+| `'auto'` | Automatically determine optimal precision | `123.4`, `0.05`, `1000` |
+| `0` | No decimal places (integers only) | `123`, `1000`, `0` |
+| `1` | One decimal place | `123.4`, `1000.0`, `0.1` |
+| `2` | Two decimal places | `123.45`, `1000.00`, `0.05` |
+| `3` | Three decimal places | `123.456`, `1000.000`, `0.001` |
+| `4` | Four decimal places | `123.4567`, `1000.0000`, `0.0001` |
+| `5` | Five decimal places | `123.45678`, `1000.00000`, `0.00001` |
+
+### `abbreviation`
+- **Type**: `NumberAbbreviation`
+- **Required**: Yes
+- **Description**: How to abbreviate large numbers
+
+```typescript
+type NumberAbbreviation = 'none' | 'auto' | 'k' | 'm' | 'b';
+```
+
+| Value | Description | Example Transformations |
+|-------|-------------|------------------------|
+| `'none'` | No abbreviation | `1000` → `1000`, `1500000` → `1500000` |
+| `'auto'` | Automatic based on magnitude | `1500` → `1.5K`, `2000000` → `2M` |
+| `'k'` | Force thousands abbreviation | `1500` → `1.5K`, `2000000` → `2000K` |
+| `'m'` | Force millions abbreviation | `1500` → `0.0015M`, `2000000` → `2M` |
+| `'b'` | Force billions abbreviation | `1500000` → `0.0015B`, `2000000000` → `2B` |
+
+## Usage Examples
+
+### Default Formatting
+```typescript
+const defaultFormat: NumberFormat = {
+  decimalPlaces: 'auto',
+  abbreviation: 'auto'
+};
+
+// Results in:
+// 1234.5678 → "1.2K" (auto precision, auto abbreviation)
+// 0.005 → "0.005" (small number, no abbreviation) 
+// 1500000 → "1.5M" (auto precision, millions)
+```
+
+### Financial Data (High Precision)
+```typescript
+const financialFormat: NumberFormat = {
+  decimalPlaces: 2,
+  abbreviation: 'auto'
+};
+
+// Results in:
+// 1234.5678 → "1.23K" (2 decimal places)
+// 1500000.789 → "1.50M" (2 decimal places)
+// 0.005 → "0.01" (2 decimal places, rounded)
+```
+
+### Simple Integers
+```typescript
+const integerFormat: NumberFormat = {
+  decimalPlaces: 0,
+  abbreviation: 'none'
+};
+
+// Results in:
+// 1234.5678 → "1235" (rounded to integer)
+// 1500000 → "1500000" (no abbreviation)
+// 0.005 → "0" (rounded to integer)
+```
+
+### Consistent Thousands
+```typescript
+const thousandsFormat: NumberFormat = {
+  decimalPlaces: 1,
+  abbreviation: 'k'
+};
+
+// Results in:
+// 1234 → "1.2K"
+// 500 → "0.5K" 
+// 1500000 → "1500.0K" (forced thousands)
+```
+
+## Formatting Behavior
+
+### Decimal Places Logic
+
+#### Auto Precision
+When `decimalPlaces` is `'auto'`, the system determines optimal precision:
+
+```typescript
+// Auto precision examples
+const autoFormat: NumberFormat = {
+  decimalPlaces: 'auto',
+  abbreviation: 'none'
+};
+
+// Small numbers keep more precision
+0.001 → "0.001"
+0.0567 → "0.057" 
+0.123456 → "0.123"
+
+// Large numbers need less precision
+1234.567 → "1235"
+12345.67 → "12346"
+
+// Medium numbers balanced
+12.3456 → "12.3"
+123.456 → "123"
+```
+
+#### Fixed Precision
+When `decimalPlaces` is a number, it's consistently applied:
+
+```typescript
+const fixed2Format: NumberFormat = {
+  decimalPlaces: 2,
+  abbreviation: 'none'
+};
+
+// Always 2 decimal places
+0.1 → "0.10"
+1234 → "1234.00"
+1234.5678 → "1234.57" (rounded)
+```
+
+### Abbreviation Behavior
+
+#### Auto Abbreviation
+Automatically chooses the most appropriate abbreviation:
+
+```typescript
+const autoAbbrev: NumberFormat = {
+  decimalPlaces: 1,
+  abbreviation: 'auto'
+};
+
+// Thousands
+1500 → "1.5K"
+15000 → "15.0K"
+
+// Millions
+1500000 → "1.5M"
+15000000 → "15.0M"
+
+// Billions
+1500000000 → "1.5B"
+15000000000 → "15.0B"
+
+// No abbreviation for small numbers
+500 → "500.0"
+```
+
+#### Forced Abbreviation
+Forces specific abbreviation regardless of magnitude:
+
+```typescript
+// Force millions
+const millionsFormat: NumberFormat = {
+  decimalPlaces: 3,
+  abbreviation: 'm'
+};
+
+1500 → "0.002M"      // Very small when forced to millions
+1500000 → "1.500M"   // Natural fit
+1500000000 → "1500.000M" // Large when forced to millions
+```
+
+## Context-Specific Examples
+
+### Sales Dashboard
+```typescript
+const salesFormat: NumberFormat = {
+  decimalPlaces: 0,     // Whole dollar amounts
+  abbreviation: 'auto'  // K, M, B as appropriate
+};
+
+// Revenue data
+125000 → "125K"
+2500000 → "2.5M"
+45 → "45" (small amounts stay unabbreviated)
+```
+
+### Scientific Data
+```typescript
+const scientificFormat: NumberFormat = {
+  decimalPlaces: 4,     // High precision
+  abbreviation: 'none'  // Keep full numbers
+};
+
+// Measurement data
+0.001234 → "0.0012"
+123.456789 → "123.4568"
+1000000 → "1000000.0000"
+```
+
+### Percentage Displays
+```typescript
+const percentageFormat: NumberFormat = {
+  decimalPlaces: 1,     // One decimal for percentages
+  abbreviation: 'none'  // Percentages don't need abbreviation
+};
+
+// When showing percentages (multiply by 100 externally)
+0.1567 → "15.7%" (after external conversion)
+0.0023 → "0.2%"
+0.8945 → "89.5%"
+```
+
+### Financial Statements
+```typescript
+const financialFormat: NumberFormat = {
+  decimalPlaces: 2,     // Standard accounting precision
+  abbreviation: 'auto'  // Auto abbreviate large numbers
+};
+
+// Balance sheet amounts
+1234567.89 → "1.23M"
+45123.45 → "45.12K"
+999.99 → "999.99"
+```
+
+### User Interface Metrics
+```typescript
+const uiMetricsFormat: NumberFormat = {
+  decimalPlaces: 'auto', // Variable precision based on context
+  abbreviation: 'auto'   // Clean display for UI
+};
+
+// User counts, page views, etc.
+1247 → "1.2K"
+15 → "15"
+2456789 → "2.5M"
+```
+
+## Advanced Formatting Patterns
+
+### Responsive Formatting
+Adjust formatting based on available space:
+
+```typescript
+function getResponsiveFormat(availableWidth: number): NumberFormat {
+  if (availableWidth < 100) {
+    // Very tight space - minimal formatting
+    return {
+      decimalPlaces: 0,
+      abbreviation: 'auto'
+    };
+  } else if (availableWidth < 200) {
+    // Limited space - some precision
+    return {
+      decimalPlaces: 1,
+      abbreviation: 'auto'
+    };
+  } else {
+    // Plenty of space - full precision
+    return {
+      decimalPlaces: 2,
+      abbreviation: 'auto'
+    };
+  }
+}
+```
+
+### Data Type Specific Formatting
+Different formatting for different data types:
+
+```typescript
+function getDataTypeFormat(dataType: string): NumberFormat {
+  switch (dataType) {
+    case 'currency':
+      return {
+        decimalPlaces: 2,
+        abbreviation: 'auto'
+      };
+      
+    case 'percentage':
+      return {
+        decimalPlaces: 1,
+        abbreviation: 'none'
+      };
+      
+    case 'count':
+      return {
+        decimalPlaces: 0,
+        abbreviation: 'auto'
+      };
+      
+    case 'measurement':
+      return {
+        decimalPlaces: 3,
+        abbreviation: 'none'
+      };
+      
+    default:
+      return {
+        decimalPlaces: 'auto',
+        abbreviation: 'auto'
+      };
+  }
+}
+```
+
+### Chart Type Specific Formatting
+Adjust formatting based on chart type:
+
+```typescript
+function getChartTypeFormat(chartType: string): NumberFormat {
+  switch (chartType) {
+    case 'pie':
+      // Pie charts often show percentages
+      return {
+        decimalPlaces: 1,
+        abbreviation: 'none'
+      };
+      
+    case 'line':
+      // Line charts benefit from consistent precision
+      return {
+        decimalPlaces: 2,
+        abbreviation: 'auto'
+      };
+      
+    case 'bar':
+      // Bar charts can handle abbreviations well
+      return {
+        decimalPlaces: 'auto',
+        abbreviation: 'auto'
+      };
+      
+    case 'scatter':
+      // Scatter plots often need precision
+      return {
+        decimalPlaces: 3,
+        abbreviation: 'none'
+      };
+      
+    default:
+      return {
+        decimalPlaces: 'auto',
+        abbreviation: 'auto'
+      };
+  }
+}
+```
+
+## International Considerations
+
+### Locale-Aware Formatting
+While `NumberFormat` doesn't directly handle locales, you can prepare data accordingly:
+
+```typescript
+// For European formats (1.234.567,89)
+const europeanData = formatForEuropean(rawData);
+const europeanFormat: NumberFormat = {
+  decimalPlaces: 2,
+  abbreviation: 'auto'
+};
+
+// For US formats (1,234,567.89) 
+const usData = formatForUS(rawData);
+const usFormat: NumberFormat = {
+  decimalPlaces: 2,
+  abbreviation: 'auto'
+};
+```
+
+### Currency Considerations
+When displaying currency, consider the currency's typical precision:
+
+```typescript
+function getCurrencyFormat(currency: string): NumberFormat {
+  switch (currency) {
+    case 'JPY':
+      // Japanese Yen typically has no decimal places
+      return {
+        decimalPlaces: 0,
+        abbreviation: 'auto'
+      };
+      
+    case 'BHD':
+    case 'KWD':
+      // Some Middle Eastern currencies use 3 decimal places
+      return {
+        decimalPlaces: 3,
+        abbreviation: 'auto'
+      };
+      
+    default:
+      // Most currencies use 2 decimal places
+      return {
+        decimalPlaces: 2,
+        abbreviation: 'auto'
+      };
+  }
+}
+```
+
+## Performance and Best Practices
+
+### Consistent Formatting
+Use consistent formatting across related charts:
+
+```typescript
+// Define once, use everywhere
+const dashboardFormat: NumberFormat = {
+  decimalPlaces: 1,
+  abbreviation: 'auto'
+};
+
+// Apply to all charts in dashboard
+const charts = [chart1, chart2, chart3].map(chart => ({
+  ...chart,
+  numberFormat: dashboardFormat
+}));
+```
+
+### Avoid Over-Precision
+Don't use unnecessary precision that clutters displays:
+
+```typescript
+// ❌ Too much precision for large numbers
+const overPrecise: NumberFormat = {
+  decimalPlaces: 5,
+  abbreviation: 'none'
+};
+// Results: 1234567.12345 (hard to read)
+
+// ✅ Appropriate precision
+const appropriate: NumberFormat = {
+  decimalPlaces: 1,
+  abbreviation: 'auto'
+};
+// Results: 1.2M (clean and readable)
+```
+
+### Context-Appropriate Abbreviations
+Choose abbreviations that make sense for your audience:
+
+```typescript
+// For financial audiences - abbreviations are expected
+const financialFormat: NumberFormat = {
+  decimalPlaces: 1,
+  abbreviation: 'auto'
+};
+
+// For scientific contexts - full precision might be needed
+const scientificFormat: NumberFormat = {
+  decimalPlaces: 4,
+  abbreviation: 'none'
+};
+
+// For general audiences - moderate abbreviation
+const generalFormat: NumberFormat = {
+  decimalPlaces: 'auto',
+  abbreviation: 'auto'
+};
+```
+
+## Testing and Validation
+
+### Test with Edge Cases
+Always test your format with various number ranges:
+
+```typescript
+const testFormat: NumberFormat = {
+  decimalPlaces: 2,
+  abbreviation: 'auto'
+};
+
+const testValues = [
+  0,           // Zero
+  0.001,       // Very small positive
+  -0.001,      // Very small negative
+  1,           // Unit value
+  999,         // Just under K
+  1000,        // K threshold
+  999999,      // Just under M
+  1000000,     // M threshold
+  -1234567,    // Negative large number
+  1234567890   // Very large number
+];
+
+testValues.forEach(value => {
+  console.log(`${value} → ${formatNumber(value, testFormat)}`);
+});
+```
+
+### Validation Function
+Create validation to ensure format settings are reasonable:
+
+```typescript
+function validateNumberFormat(format: NumberFormat): boolean {
+  // Check decimal places
+  if (typeof format.decimalPlaces === 'number') {
+    if (format.decimalPlaces < 0 || format.decimalPlaces > 5) {
+      console.warn('Decimal places should be between 0 and 5');
+      return false;
+    }
+  }
+  
+  // Check abbreviation
+  const validAbbreviations = ['none', 'auto', 'k', 'm', 'b'];
+  if (!validAbbreviations.includes(format.abbreviation)) {
+    console.warn('Invalid abbreviation option');
+    return false;
+  }
+  
+  return true;
+}
+```
+
+## Common Use Cases
+
+### E-commerce Metrics
+```typescript
+const ecommerceFormat: NumberFormat = {
+  decimalPlaces: 0,      // Whole dollar amounts
+  abbreviation: 'auto'   // Clean display: $1.5K, $2.3M
+};
+```
+
+### Social Media Analytics
+```typescript
+const socialFormat: NumberFormat = {
+  decimalPlaces: 1,      // Some precision: 1.2K followers
+  abbreviation: 'auto'   // Essential for large numbers
+};
+```
+
+### Manufacturing KPIs
+```typescript
+const manufacturingFormat: NumberFormat = {
+  decimalPlaces: 2,      // Precision matters in manufacturing
+  abbreviation: 'k'      // Consistent thousands for units
+};
+```
+
+### Survey Results
+```typescript
+const surveyFormat: NumberFormat = {
+  decimalPlaces: 0,      // Whole person counts
+  abbreviation: 'none'   // Usually not large enough for abbreviation
+};
+```

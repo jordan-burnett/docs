@@ -1,80 +1,390 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quick Start Guide"  
+description: "Get started with Graphy Core SDK in minutes. Learn how to create your first interactive chart with VisualisationProvider and VisualisationController."
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
+The Graphy Core SDK provides powerful, flexible charting components for React applications. This guide will get you up and running with your first interactive chart.
 
-### Step 1: Set up your local environment
+## Installation
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash
+npm install @graphylib/core @graphylib/types
+```
 
-### Step 2: Deploy your changes
+## Basic Example
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Here's a complete example showing how to create a simple bar chart:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+```typescript
+import React from 'react';
+import { 
+  VisualisationProvider, 
+  VisualisationController,
+  RawData,
+  DatasetConfig,
+  VisualisationConfig
+} from '@graphylib/core';
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+function MyChart() {
+  // 1. Prepare your data
+  const data: RawData = {
+    rows: [
+      { category: 'Product A', sales: 12500, profit: 3200 },
+      { category: 'Product B', sales: 18700, profit: 5100 },
+      { category: 'Product C', sales: 9800, profit: 2800 },
+      { category: 'Product D', sales: 15600, profit: 4200 }
+    ]
+  };
 
-### Step 3: Go live
+  // 2. Configure your dataset
+  const datasetConfig: DatasetConfig = {
+    properties: [
+      { 
+        key: 'category', 
+        label: 'Product Category',
+        dataType: { type: 'text' }
+      },
+      { 
+        key: 'sales', 
+        label: 'Sales Revenue',
+        dataType: { type: 'currency', iso: 'usd' }
+      },
+      { 
+        key: 'profit', 
+        label: 'Profit',
+        dataType: { type: 'currency', iso: 'usd' }
+      }
+    ],
+    isDataHorizontal: false
+  };
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  // 3. Set visualization configuration
+  const visualisationConfig: VisualisationConfig = {
+    type: 'bar',
+    barPosition: 'grouped',
+    shouldStartFromZero: true,
+    hasGridLines: true,
+    showDataLabels: true,
+    legendPosition: 'top'
+  };
 
-## Next steps
+  // 4. Define sticker paths for annotations
+  const stickerPaths = {
+    'rocket': '/stickers/rocket.svg',
+    'thumbs-up': '/stickers/thumbs-up.svg',
+    'thumbs-down': '/stickers/thumbs-down.svg',
+    'clapping-hands': '/stickers/clapping-hands.svg',
+    'grinning-face': '/stickers/grinning-face.svg'
+  };
 
-Now that you have your docs running, explore these key features:
+  // 5. Render the chart
+  return (
+    <div style={{ width: '800px', height: '500px' }}>
+      <VisualisationProvider
+        data={data}
+        datasetConfig={datasetConfig}
+        visualisationConfig={visualisationConfig}
+        title="Product Performance Q3 2024"
+        width={800}
+        height={500}
+      >
+        <VisualisationController
+          renderTitle={({ title, onTitleChange }) => (
+            <h2 
+              style={{ 
+                margin: 0, 
+                padding: '16px',
+                fontSize: '24px',
+                fontWeight: 600
+              }}
+            >
+              {title}
+            </h2>
+          )}
+          stickerPaths={stickerPaths}
+        />
+      </VisualisationProvider>
+    </div>
+  );
+}
 
-<CardGroup cols={2}>
+export default MyChart;
+```
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+## Core Concepts
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+### 1. Data Structure
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+Your data should follow the `RawData` format:
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+```typescript
+const data: RawData = {
+  rows: [
+    { column1: 'value1', column2: 100, column3: 'text' },
+    { column1: 'value2', column2: 200, column3: 'more text' }
+    // ... more rows
+  ]
+};
+```
 
-</CardGroup>
+- Each row represents a data point
+- Column names become the keys you reference in configuration
+- Values can be strings, numbers, or null
+- Consistent column structure across all rows
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+### 2. Dataset Configuration
+
+Define how your data should be interpreted:
+
+```typescript
+const datasetConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'column1',           // Must match your data keys
+      label: 'Display Name',    // Human-readable column name
+      dataType: { type: 'text' } // How to format this data
+    }
+  ],
+  isDataHorizontal: false      // Data layout orientation
+};
+```
+
+### 3. Visualization Configuration
+
+Control chart behavior and appearance:
+
+```typescript
+const visualisationConfig: VisualisationConfig = {
+  type: 'bar',                 // Chart type
+  barPosition: 'grouped',      // Bar arrangement
+  shouldStartFromZero: true,   // Y-axis behavior
+  hasGridLines: true,          // Show grid
+  showDataLabels: true         // Display values on chart
+};
+```
+
+## Chart Types
+
+The SDK supports multiple visualization types:
+
+```typescript
+// Bar Charts
+{ type: 'bar', barPosition: 'grouped' | 'stacked' | 'stacked-fill' }
+
+// Line Charts  
+{ type: 'line', curveType: 'linear' | 'catmull-rom' }
+
+// Pie Charts
+{ type: 'pie', pieAppearance: 'pie' | 'donut' }
+
+// Scatter Plots
+{ type: 'scatter', pointSize: 5 }
+
+// Combo Charts
+{ type: 'combo', comboPlotType: 'grouped-bars' | 'stacked-bars' | 'lines' }
+
+// Others: 'funnel', 'heatmap', 'table', 'waterfall', 'mekko'
+```
+
+## Customizing Appearance
+
+### Theme Selection
+
+```typescript
+const appearanceConfig: AppearanceConfig = {
+  theme: 'graphy',           // 'graphy', 'mono', 'pastel', 'neon', 'custom'
+  palette: 'graphy',         // Theme-specific palette
+  borderStyle: 'solid',      // 'none', 'gradient', 'solid'  
+  borderStyleName: 'blue',   // Specific color
+  background: 'LIGHT',       // 'DARK' or 'LIGHT'
+  font: 'modern'            // Typography style
+};
+
+<VisualisationProvider
+  customAppearanceConfig={appearanceConfig}
+  // ... other props
+>
+```
+
+### Typography and Scaling
+
+```typescript
+const appearanceConfig: AppearanceConfig = {
+  theme: 'graphy',
+  palette: 'graphy', 
+  borderStyle: 'none',
+  borderStyleName: null,
+  font: 'modern',           // 'modern', 'fresh', 'timeless', 'technical'
+  textScale: '1.2',         // '0.8' to '4' for different sizes
+  hasRoundedCorners: true   // Modern rounded appearance
+};
+```
+
+## Interactive Features
+
+### Editable Charts
+
+```typescript
+<VisualisationController
+  renderTitle={({ title, onTitleChange }) => (
+    <input 
+      value={title}
+      onChange={(e) => onTitleChange?.(e.target.value)}
+      style={{ fontSize: '24px', fontWeight: 'bold' }}
+    />
+  )}
+  stickerPaths={stickerPaths}
+  isEditable={true}        // Enable editing features
+  isInteractive={true}     // Enable hover/click interactions
+/>
+```
+
+### Read-Only Mode
+
+```typescript
+<VisualisationController
+  renderTitle={({ title }) => <h2>{title}</h2>}
+  stickerPaths={stickerPaths}
+  isEditable={false}       // Disable editing
+  isInteractive={true}     // Keep hover effects
+/>
+```
+
+## Advanced Features
+
+### Power-ups
+
+Add trend lines, averages, or goal lines:
+
+```typescript
+const visualisationConfig: VisualisationConfig = {
+  type: 'line',
+  presetPowerUp: 'trendline',    // Add trend line
+  trendLineType: 'linear',       // Trend calculation method
+  
+  // OR add goal lines
+  customPowerUp: 'goal',
+  yGoalValue: 50000,             // Target value
+  customGoalLineLabel: 'Target'  // Goal line label
+};
+```
+
+### Number Formatting
+
+```typescript
+const numberFormat: NumberFormat = {
+  decimalPlaces: 1,          // 0-5 or 'auto'
+  abbreviation: 'k'          // 'none', 'auto', 'k', 'm', 'b'
+};
+
+<VisualisationProvider
+  numberFormat={numberFormat}
+  // ... other props
+>
+```
+
+### Custom Toolbar
+
+```typescript
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+  toolbar={
+    <div style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+      <button onClick={exportChart}>Export PNG</button>
+      <button onClick={exportData}>Export Data</button>
+    </div>
+  }
+/>
+```
+
+## Data Access
+
+### Reading Chart State
+
+Access chart data and configuration from child components:
+
+```typescript
+import { useVisualisationStore } from '@graphylib/core';
+
+function ChartInfo() {
+  const chartType = useVisualisationStore(state => state.config.type);
+  const dataRowCount = useVisualisationStore(state => state.data.rows.length);
+  const palette = useVisualisationStore(state => state.vizPalette);
+  
+  return (
+    <div>
+      <p>Chart Type: {chartType}</p>
+      <p>Data Points: {dataRowCount}</p>
+      <p>Colors: {palette.join(', ')}</p>
+    </div>
+  );
+}
+
+// Use within VisualisationProvider
+<VisualisationProvider {...config}>
+  <VisualisationController {...controllerProps} />
+  <ChartInfo />
+</VisualisationProvider>
+```
+
+## Next Steps
+
+- [VisualisationProvider Reference](/docs/visualisation-provider) - Complete API documentation
+- [VisualisationController Reference](/docs/visualisation-controller) - Controller options and features  
+- [Schemas & Types Reference](/docs/schemas) - Comprehensive type documentation
+- Explore interactive features like annotations and custom addons
+- Learn about responsive design and export capabilities
+- Implement custom themes and brand kits
+
+## Common Patterns
+
+### Responsive Charts
+
+```typescript
+function ResponsiveChart() {
+  const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+  
+  return (
+    <VisualisationProvider
+      width={dimensions.width}
+      height={dimensions.height}
+      // ... other props
+    >
+      <VisualisationController
+        onResize={(width, height) => setDimensions({ width, height })}
+        shouldFitContainer={true}
+        // ... other props
+      />
+    </VisualisationProvider>
+  );
+}
+```
+
+### Multiple Charts with Shared Data
+
+```typescript
+function Dashboard() {
+  const sharedData = useData(); // Your data source
+  
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+      <VisualisationProvider 
+        data={sharedData} 
+        visualisationConfig={{ type: 'bar' }}
+      >
+        <VisualisationController {...props} />
+      </VisualisationProvider>
+      
+      <VisualisationProvider 
+        data={sharedData}
+        visualisationConfig={{ type: 'pie' }}
+      >
+        <VisualisationController {...props} />  
+      </VisualisationProvider>
+    </div>
+  );
+}
+```

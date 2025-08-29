@@ -1,0 +1,633 @@
+---
+title: "VisualisationConfig"
+description: "Comprehensive configuration object that controls chart behavior, appearance, and interactive features across all chart types."
+---
+
+# VisualisationConfig
+
+`VisualisationConfig` is the central configuration object that defines how your data should be visualized. It controls chart type, behavior, styling, and interactive features across all supported visualization types.
+
+## Type Definition
+
+```typescript
+interface VisualisationConfig {
+  // Chart Type & Core Behavior
+  type: VizType;
+  locale: VizLocale;
+  
+  // Bar Chart Configuration
+  barPosition: BarPosition;
+  flipAxes: boolean;
+  sortBars: boolean;
+  
+  // Axis Configuration  
+  topAxisLabel?: string | null;
+  bottomAxisLabel?: string | null;
+  leftAxisLabel?: string | null;
+  rightAxisLabel?: string | null;
+  hideCrossAxis: boolean;
+  reverseCrossAxisPosition?: boolean;
+  
+  // Scale & Range
+  shouldStartFromZero: boolean;
+  customYAxisStartFrom?: number | null;
+  customYAxisEndAt?: number | null;
+  useLogScale: boolean;
+  
+  // Visual Elements
+  hasGridLines: boolean;
+  showDataLabels: boolean;
+  showPercentageLabels: boolean;
+  showStackTotals: boolean;
+  legendPosition?: LegendPosition;
+  
+  // Power-ups & Analytics
+  presetPowerUp?: PresetPowerUp | null;
+  customPowerUp?: CustomPowerUp | null;
+  averageLineSeriesKey?: string | null;
+  trendLineType?: TrendType;
+  
+  // Goal Lines & Reference Lines
+  xGoalValue?: string | number | null;
+  yGoalValue?: number | null;
+  customGoalLineLabel?: string | null;
+  customLineValue?: number | null;
+  customLineLabel?: string | null;
+  
+  // Line Chart Specific
+  curveType: CurveType;
+  lineThickness?: number | null;
+  treatEmptyValues?: TreatEmptyValues;
+  
+  // Pie Chart Specific
+  pieAppearance: PieChartAppearance;
+  pieTotalPosition?: PieTotalPosition | null;
+  showCategoryLabels?: boolean;
+  
+  // Combo Chart Specific
+  comboPlotType: ComboPlotType;
+  comboPlotAxisCount?: ComboPlotAxisCount;
+  
+  // Scatter Plot Specific
+  pointSize?: number | null;
+  
+  // Funnel Chart Specific
+  headlineMetric?: HeadlineMetric | null;
+}
+```
+
+## Core Configuration
+
+### `type`
+- **Type**: `VizType`
+- **Required**: Yes
+- **Description**: The primary chart type to render
+
+```typescript
+type VizType = 'bar' | 'line' | 'pie' | 'funnel' | 'combo' | 'heatmap' | 'table' | 'scatter' | 'waterfall' | 'mekko';
+```
+
+| Type | Description | Best For |
+|------|-------------|----------|
+| `bar` | Vertical or horizontal bar charts | Comparing categories, rankings |
+| `line` | Line charts with connected points | Time series, trends over time |
+| `pie` | Circular charts showing parts of whole | Proportions, percentages |
+| `scatter` | Point plots showing correlation | Relationships between two variables |
+| `combo` | Combined bar and line elements | Multiple metrics with different scales |
+| `funnel` | Funnel-shaped charts | Conversion processes, pipelines |
+| `waterfall` | Charts showing cumulative effect | Financial analysis, variance analysis |
+| `table` | Tabular data presentation | Detailed data review, exact values |
+| `heatmap` | Color-coded matrix visualization | Correlation matrices, density plots |
+| `mekko` | Variable-width column charts | Market share analysis |
+
+### `locale`
+- **Type**: `VizLocale`
+- **Required**: Yes
+- **Default**: `'EN_GB'`
+- **Description**: Locale for number and date formatting
+
+```typescript
+type VizLocale = 'EN_GB' | 'EN_US';
+```
+
+## Bar Chart Configuration
+
+### `barPosition`
+- **Type**: `BarPosition`
+- **Default**: `'grouped'`
+- **Description**: How multiple data series should be arranged
+
+```typescript
+type BarPosition = 'grouped' | 'stacked' | 'stacked-fill';
+```
+
+| Value | Description | Use Case |
+|-------|-------------|----------|
+| `grouped` | Bars side by side | Compare values across categories |
+| `stacked` | Bars stacked vertically | Show total and composition |
+| `stacked-fill` | 100% stacked bars | Show proportions within categories |
+
+### `flipAxes`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Create horizontal bars instead of vertical
+
+```typescript
+// Vertical bars (default)
+{ type: 'bar', flipAxes: false }
+
+// Horizontal bars  
+{ type: 'bar', flipAxes: true }
+```
+
+### `sortBars`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Automatically sort bars by value in descending order
+
+## Axis Configuration
+
+### Axis Labels
+
+Set custom labels for chart axes:
+
+```typescript
+const config: VisualisationConfig = {
+  type: 'bar',
+  topAxisLabel: 'Revenue ($M)',      // Top axis label
+  bottomAxisLabel: 'Product Lines',  // Bottom axis label (usually X-axis)
+  leftAxisLabel: 'Sales Volume',     // Left axis label (usually Y-axis)
+  rightAxisLabel: 'Growth Rate (%)', // Right axis label (combo charts)
+  // ...
+};
+```
+
+### `hideCrossAxis`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Hide the value axis (Y-axis for vertical charts, X-axis for horizontal)
+
+### `reverseCrossAxisPosition`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Move axis to opposite side (e.g., Y-axis from left to right)
+
+## Scale and Range Configuration
+
+### `shouldStartFromZero`
+- **Type**: `boolean`
+- **Default**: `true`
+- **Description**: Whether the value axis should start from zero
+
+```typescript
+// Start from zero (shows full context)
+{ shouldStartFromZero: true }
+
+// Start from minimum value (emphasizes differences)
+{ shouldStartFromZero: false }
+```
+
+### Custom Axis Range
+
+```typescript
+const config: VisualisationConfig = {
+  type: 'line',
+  customYAxisStartFrom: 100,  // Force Y-axis to start at 100
+  customYAxisEndAt: 1000,     // Force Y-axis to end at 1000
+  // ...
+};
+```
+
+### `useLogScale`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Use logarithmic scale for the value axis
+- **Use Cases**: Data with wide value ranges, exponential growth
+
+## Visual Elements
+
+### `hasGridLines`
+- **Type**: `boolean`
+- **Default**: `true`
+- **Description**: Show grid lines for easier value reading
+
+### Data Labels
+
+```typescript
+const config: VisualisationConfig = {
+  type: 'bar',
+  showDataLabels: true,           // Show values on data points
+  showPercentageLabels: false,    // Show as percentages vs absolute values
+  showStackTotals: true,          // Show totals above stacked bars
+  // ...
+};
+```
+
+### `legendPosition`
+- **Type**: `LegendPosition`
+- **Default**: Auto-determined
+- **Description**: Where to position the chart legend
+
+```typescript
+type LegendPosition = 'top' | 'right' | 'none';
+```
+
+## Power-ups and Analytics
+
+### Preset Power-ups
+
+```typescript
+type PresetPowerUp = 'trendline' | 'average';
+
+const trendlineConfig: VisualisationConfig = {
+  type: 'scatter',
+  presetPowerUp: 'trendline',
+  trendLineType: 'linear',  // Type of trend calculation
+  // ...
+};
+
+const averageConfig: VisualisationConfig = {
+  type: 'bar', 
+  presetPowerUp: 'average',
+  averageLineSeriesKey: 'sales', // Which series to average
+  // ...
+};
+```
+
+#### Trend Line Types
+
+```typescript
+type TrendType = 'linear' | 'exponential' | 'logarithmic' | 'quadratic' | 'power' | 'loess' | 'polynomial';
+```
+
+| Type | Description | Best For |
+|------|-------------|----------|
+| `linear` | Straight line trend | Steady growth/decline |
+| `exponential` | Exponential curve | Rapid growth patterns |
+| `logarithmic` | Logarithmic curve | Diminishing returns |
+| `quadratic` | Parabolic curve | Acceleration/deceleration |
+| `polynomial` | Higher-order polynomial | Complex patterns |
+| `loess` | Locally weighted regression | Smooth, flexible curves |
+
+### Custom Power-ups
+
+```typescript
+type CustomPowerUp = 'goal' | 'custom';
+
+const goalConfig: VisualisationConfig = {
+  type: 'line',
+  customPowerUp: 'goal',
+  xGoalValue: '2024-12-31',        // X-axis goal (date/category)
+  yGoalValue: 1000000,             // Y-axis goal (numeric)
+  customGoalLineLabel: 'Target',   // Label for goal line
+  // ...
+};
+
+const customLineConfig: VisualisationConfig = {
+  type: 'bar',
+  customPowerUp: 'custom',
+  customLineValue: 500000,         // Custom reference line value
+  customLineLabel: 'Threshold',    // Label for reference line
+  // ...
+};
+```
+
+## Chart Type-Specific Configuration
+
+### Line Charts
+
+```typescript
+const lineConfig: VisualisationConfig = {
+  type: 'line',
+  curveType: 'catmull-rom',        // 'linear' | 'catmull-rom'
+  lineThickness: 3,                // Line width in pixels
+  treatEmptyValues: 'fill',        // How to handle missing data
+  // ...
+};
+```
+
+#### Empty Value Handling
+
+```typescript
+type TreatEmptyValues = 'empty' | 'zero' | 'fill';
+```
+
+| Value | Description | Visual Effect |
+|-------|-------------|---------------|
+| `empty` | Show gaps in line | Broken line segments |
+| `zero` | Treat as zero value | Line drops to zero |
+| `fill` | Interpolate between points | Smooth continuous line |
+
+### Pie Charts
+
+```typescript
+const pieConfig: VisualisationConfig = {
+  type: 'pie',
+  pieAppearance: 'donut',          // 'pie' | 'donut'
+  pieTotalPosition: 'center',      // 'center' | 'left' | null
+  showCategoryLabels: true,        // Show category names
+  // ...
+};
+```
+
+### Combo Charts
+
+```typescript
+const comboConfig: VisualisationConfig = {
+  type: 'combo',
+  comboPlotType: 'grouped-bars',   // 'grouped-bars' | 'stacked-bars' | 'lines'
+  comboPlotAxisCount: 'double',    // 'single' | 'double'
+  // ...
+};
+```
+
+#### Combo Plot Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `grouped-bars` | Bars grouped by category | Multiple metrics, same scale |
+| `stacked-bars` | Bars stacked within categories | Parts of whole + total |
+| `lines` | Line overlay on bars | Trend with volume |
+
+### Scatter Plots
+
+```typescript
+const scatterConfig: VisualisationConfig = {
+  type: 'scatter',
+  pointSize: 8,                    // Point diameter in pixels
+  // ...
+};
+```
+
+### Funnel Charts
+
+```typescript
+const funnelConfig: VisualisationConfig = {
+  type: 'funnel',
+  headlineMetric: 'conversion',    // 'current' | 'average' | 'total' | 'conversion'
+  // ...
+};
+```
+
+## Complete Configuration Examples
+
+### Sales Dashboard Bar Chart
+
+```typescript
+const salesBarConfig: VisualisationConfig = {
+  // Core settings
+  type: 'bar',
+  locale: 'EN_US',
+  
+  // Bar configuration
+  barPosition: 'grouped',
+  flipAxes: false,
+  sortBars: true,
+  
+  // Axis labels
+  bottomAxisLabel: 'Product Categories',
+  leftAxisLabel: 'Revenue (USD)',
+  
+  // Scale settings
+  shouldStartFromZero: true,
+  useLogScale: false,
+  
+  // Visual elements
+  hasGridLines: true,
+  showDataLabels: true,
+  showPercentageLabels: false,
+  legendPosition: 'top',
+  
+  // Analytics
+  presetPowerUp: 'average',
+  averageLineSeriesKey: 'revenue'
+};
+```
+
+### Time Series Line Chart
+
+```typescript
+const timeSeriesConfig: VisualisationConfig = {
+  // Core settings
+  type: 'line',
+  locale: 'EN_GB',
+  
+  // Line configuration
+  curveType: 'catmull-rom',
+  lineThickness: 2,
+  treatEmptyValues: 'fill',
+  
+  // Axis configuration
+  bottomAxisLabel: 'Date',
+  leftAxisLabel: 'Daily Active Users',
+  
+  // Scale settings
+  shouldStartFromZero: false,
+  
+  // Visual elements
+  hasGridLines: true,
+  showDataLabels: false,
+  legendPosition: 'right',
+  
+  // Analytics
+  presetPowerUp: 'trendline',
+  trendLineType: 'linear',
+  
+  // Goal tracking
+  customPowerUp: 'goal',
+  yGoalValue: 10000,
+  customGoalLineLabel: 'Target DAU'
+};
+```
+
+### Multi-Metric Combo Chart
+
+```typescript
+const comboConfig: VisualisationConfig = {
+  // Core settings
+  type: 'combo',
+  locale: 'EN_US',
+  
+  // Combo configuration
+  comboPlotType: 'lines',
+  comboPlotAxisCount: 'double',
+  
+  // Axis configuration
+  bottomAxisLabel: 'Month',
+  leftAxisLabel: 'Sales Volume',
+  rightAxisLabel: 'Conversion Rate (%)',
+  
+  // Visual elements
+  hasGridLines: true,
+  showDataLabels: true,
+  legendPosition: 'top',
+  
+  // Scale settings
+  shouldStartFromZero: true
+};
+```
+
+### Conversion Funnel
+
+```typescript
+const funnelConfig: VisualisationConfig = {
+  // Core settings
+  type: 'funnel',
+  locale: 'EN_US',
+  
+  // Funnel configuration
+  headlineMetric: 'conversion',
+  
+  // Visual elements
+  showDataLabels: true,
+  showPercentageLabels: true,
+  legendPosition: 'right',
+  
+  // Goal tracking
+  customPowerUp: 'goal',
+  yGoalValue: 0.15, // 15% conversion target
+  customGoalLineLabel: 'Target Conversion'
+};
+```
+
+### Market Share Pie Chart
+
+```typescript
+const marketShareConfig: VisualisationConfig = {
+  // Core settings
+  type: 'pie',
+  locale: 'EN_US',
+  
+  // Pie configuration
+  pieAppearance: 'donut',
+  pieTotalPosition: 'center',
+  showCategoryLabels: true,
+  
+  // Visual elements
+  showDataLabels: true,
+  showPercentageLabels: true,
+  legendPosition: 'right'
+};
+```
+
+## Configuration Patterns
+
+### Progressive Enhancement
+
+Start with basic configuration and add features:
+
+```typescript
+// Basic chart
+const basic: VisualisationConfig = {
+  type: 'bar',
+  locale: 'EN_US'
+};
+
+// Enhanced with formatting
+const enhanced: VisualisationConfig = {
+  ...basic,
+  showDataLabels: true,
+  hasGridLines: true,
+  legendPosition: 'top'
+};
+
+// Advanced with analytics
+const advanced: VisualisationConfig = {
+  ...enhanced,
+  presetPowerUp: 'trendline',
+  trendLineType: 'linear',
+  customPowerUp: 'goal',
+  yGoalValue: 1000000
+};
+```
+
+### Responsive Configuration
+
+Adjust configuration based on screen size:
+
+```typescript
+function getResponsiveConfig(isMobile: boolean): VisualisationConfig {
+  return {
+    type: 'bar',
+    locale: 'EN_US',
+    flipAxes: isMobile,           // Horizontal bars on mobile
+    legendPosition: isMobile ? 'none' : 'top',
+    showDataLabels: !isMobile,    // Hide labels on small screens
+    hasGridLines: !isMobile
+  };
+}
+```
+
+## Validation and Best Practices
+
+### Type-Specific Validation
+
+Some properties are only valid for specific chart types:
+
+```typescript
+// ✅ Valid combinations
+const validBar: VisualisationConfig = {
+  type: 'bar',
+  barPosition: 'stacked',
+  flipAxes: true
+};
+
+const validPie: VisualisationConfig = {
+  type: 'pie', 
+  pieAppearance: 'donut',
+  showCategoryLabels: true
+};
+
+// ❌ Invalid combinations (will be ignored)
+const invalid: VisualisationConfig = {
+  type: 'line',
+  barPosition: 'stacked',    // Ignored for line charts
+  pieAppearance: 'donut'     // Ignored for line charts
+};
+```
+
+### Performance Considerations
+
+- **Data Labels**: Can impact performance with large datasets
+- **Trend Lines**: Computationally expensive for large datasets  
+- **Complex Curves**: `catmull-rom` curves are more expensive than `linear`
+- **Multiple Power-ups**: Avoid combining too many analytics features
+
+### Common Mistakes
+
+```typescript
+// ❌ Inconsistent axis configuration
+const problematic: VisualisationConfig = {
+  type: 'bar',
+  flipAxes: true,
+  leftAxisLabel: 'Categories',  // Should be bottomAxisLabel for flipped bars
+  bottomAxisLabel: 'Values'     // Should be leftAxisLabel for flipped bars
+};
+
+// ✅ Correct axis configuration for flipped bars
+const correct: VisualisationConfig = {
+  type: 'bar',
+  flipAxes: true,
+  bottomAxisLabel: 'Categories', // Categories still on bottom
+  leftAxisLabel: 'Values'        // Values now on left
+};
+```
+
+### Testing Configurations
+
+Always test configurations with your actual data:
+
+```typescript
+// Test with different data scenarios
+const testConfigs = [
+  { type: 'bar', showDataLabels: true },
+  { type: 'line', treatEmptyValues: 'fill' },
+  { type: 'pie', showPercentageLabels: true }
+] as VisualisationConfig[];
+
+// Validate each configuration
+testConfigs.forEach(config => {
+  // Test with your data
+  validateConfiguration(config, yourData);
+});
+```

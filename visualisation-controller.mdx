@@ -1,0 +1,277 @@
+---
+title: "VisualisationController"
+description: "The main component responsible for rendering charts with interactive features and layout management"
+---
+
+# VisualisationController
+
+The `VisualisationController` is the primary rendering component that displays your chart. It must be used inside a `VisualisationProvider` to access chart data and configuration. This component handles chart rendering, layout, interactivity, and provides a flexible interface for customization.
+
+## Overview
+
+`VisualisationController` takes the computed state from `VisualisationProvider` and renders it as an interactive chart. It provides:
+
+- Chart rendering with full interactivity
+- Layout management and responsive design
+- Annotation support (stickers, tooltips, highlights)
+- Title and footer customization
+- Export and editing capabilities
+
+## Basic Usage
+
+```typescript
+import { VisualisationProvider, VisualisationController } from '@graphylib/core';
+
+function MyChart() {
+  return (
+    <VisualisationProvider data={data} visualisationConfig={config}>
+      <VisualisationController
+        renderTitle={({ title, onTitleChange }) => (
+          <input 
+            value={title} 
+            onChange={(e) => onTitleChange?.(e.target.value)}
+          />
+        )}
+        stickerPaths={{
+          'rocket': '/path/to/rocket.svg',
+          'thumbs-up': '/path/to/thumbs-up.svg'
+        }}
+      />
+    </VisualisationProvider>
+  );
+}
+```
+
+## Props
+
+### Required Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `renderTitle` | `(props: VisualisationTitleRenderProps) => ReactNode` | Function to render the chart title |
+| `stickerPaths` | `StickerPaths` | Mapping of sticker IDs to their SVG file paths |
+
+### Layout & Appearance Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `appearanceVariant` | `VisualisationLayoutAppearanceVariant` | - | Visual variant for the chart layout |
+| `borderSize` | `VisualisationLayoutBorderSize` | `'sm'` | Size of the chart border |
+| `hasBorder` | `boolean` | `true` | Whether to show a border around the chart |
+| `shouldFitContainer` | `boolean` | - | Whether the chart should fit its container |
+| `zoom` | `number` | - | Zoom level for the chart display |
+
+### Interactivity Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isEditable` | `boolean` | `true` | Whether the chart can be edited |
+| `isInteractive` | `boolean` | `true` | Whether chart interactions are enabled |
+| `addons` | `Addon[]` | - | Additional interactive addons |
+
+### Sizing Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `chartWidth` | `number` | Override chart width (pixels) |
+| `chartHeight` | `number` | Override chart height (pixels) |
+| `onResize` | `ResizeObserverOnResize` | Callback when chart is resized |
+
+### Content Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `toolbar` | `ReactNode` | Custom toolbar component |
+| `footerContent` | `ReactNode` | Content to display in the chart footer |
+
+### Export Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isExport` | `boolean` | - | Whether this is being rendered for export |
+
+## Title Rendering
+
+The `renderTitle` prop allows you to customize how the chart title is displayed:
+
+```typescript
+interface VisualisationTitleRenderProps {
+  title: string;                           // Current title text
+  titleDocument: JSONContent;             // Rich text document
+  onTitleChange?: (title: string) => void; // Update title text
+  onTitleDocumentChange?: (content: JSONContent) => void; // Update rich content
+}
+```
+
+### Simple Text Title
+
+```typescript
+<VisualisationController
+  renderTitle={({ title }) => (
+    <h2 className="chart-title">{title}</h2>
+  )}
+  stickerPaths={stickerPaths}
+/>
+```
+
+### Editable Title
+
+```typescript
+<VisualisationController
+  renderTitle={({ title, onTitleChange }) => (
+    <input
+      value={title}
+      onChange={(e) => onTitleChange?.(e.target.value)}
+      className="chart-title-input"
+    />
+  )}
+  stickerPaths={stickerPaths}
+/>
+```
+
+### Rich Text Title
+
+```typescript
+<VisualisationController
+  renderTitle={({ titleDocument, onTitleDocumentChange }) => (
+    <RichTextEditor
+      content={titleDocument}
+      onChange={onTitleDocumentChange}
+    />
+  )}
+  stickerPaths={stickerPaths}
+/>
+```
+
+## Sticker Paths
+
+Sticker annotations require you to provide SVG paths for each sticker type:
+
+```typescript
+const stickerPaths: StickerPaths = {
+  'rocket': '/assets/stickers/rocket.svg',
+  'clapping-hands': '/assets/stickers/clapping-hands.svg',
+  'thumbs-up': '/assets/stickers/thumbs-up.svg',
+  'thumbs-down': '/assets/stickers/thumbs-down.svg',
+  'grinning-face': '/assets/stickers/grinning-face.svg'
+};
+
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+/>
+```
+
+## Interactive Features
+
+### Annotations
+
+When `isEditable` is true, users can add various types of annotations:
+
+- **Sticker annotations**: Visual markers on data points
+- **Tooltip annotations**: Custom tooltips with rich content
+- **Highlight annotations**: Emphasis on data points, series, or x-values
+- **Text annotations**: Freeform text with positioning
+- **Arrow annotations**: Directional indicators with customization
+- **Shape annotations**: Geometric overlays
+
+### Chart Interactions
+
+- Hover effects and tooltips
+- Data point selection and highlighting  
+- Zoom and pan (where applicable)
+- Legend interactions
+- Axis label editing (when editable)
+
+## Layout Management
+
+The controller handles responsive layout and provides several appearance variants:
+
+```typescript
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+  appearanceVariant="card"
+  borderSize="md" 
+  hasBorder={true}
+  shouldFitContainer={true}
+/>
+```
+
+## Advanced Usage
+
+### Custom Addons
+
+Extend functionality with custom interactive addons:
+
+```typescript
+const customAddons: Addon[] = [
+  {
+    id: 'custom-interaction',
+    component: MyCustomInteractionComponent,
+    props: { /* custom props */ }
+  }
+];
+
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+  addons={customAddons}
+/>
+```
+
+### Export Mode
+
+For generating static exports, disable interactivity:
+
+```typescript
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+  isExport={true}
+  isInteractive={false}
+  isEditable={false}
+/>
+```
+
+### Custom Toolbar
+
+Add custom controls above the chart:
+
+```typescript
+<VisualisationController
+  renderTitle={renderTitle}
+  stickerPaths={stickerPaths}
+  toolbar={
+    <div className="chart-toolbar">
+      <button onClick={exportChart}>Export</button>
+      <button onClick={resetZoom}>Reset Zoom</button>
+    </div>
+  }
+/>
+```
+
+## Performance Considerations
+
+- The controller automatically optimizes rendering for large datasets
+- Interactive features are efficiently handled through event delegation  
+- Annotations are rendered on-demand to maintain performance
+- Export mode disables expensive interactive features
+
+## Accessibility
+
+The controller includes built-in accessibility features:
+
+- Keyboard navigation support
+- Screen reader compatible labels
+- High contrast mode support
+- Focus management for interactive elements
+
+## Type Safety
+
+All props are fully typed with TypeScript, including:
+
+- Strict typing for addon configurations
+- Type-safe sticker path mappings
+- Comprehensive prop validation
+- Generic support for custom data types

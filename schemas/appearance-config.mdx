@@ -1,0 +1,629 @@
+---
+title: "AppearanceConfig"
+description: "Comprehensive styling and theming configuration that controls the visual appearance of charts including colors, borders, typography, and layout."
+---
+
+# AppearanceConfig
+
+`AppearanceConfig` controls the visual styling and theming of your charts. It provides comprehensive customization options including color themes, typography, borders, backgrounds, and content visibility settings.
+
+## Type Definition
+
+```typescript
+interface AppearanceConfig {
+  // Theme Selection
+  theme: ThemeName;
+  palette: string | null;
+  
+  // Border Styling
+  borderStyle: ChartBorderStyle;
+  borderStyleName: BorderStyleName | null;
+  customBorderStyle?: VizColor;
+  
+  // Background Configuration
+  background?: ChartBackground;
+  backgroundStyle?: ChartBackgroundStyle;
+  customBackgroundColor?: string;
+  hasTransparentBackground?: boolean;
+  hasRoundedCorners?: boolean;
+  
+  // Typography
+  font?: ChartFont;
+  textScale?: ChartTextScale;
+  
+  // Interaction Styling
+  highlightStyle?: HighlightStyle;
+  
+  // Content Visibility
+  shouldHideTitle?: boolean;
+  shouldHideSubtitle?: boolean;
+  shouldHideCaption?: boolean;
+  shouldHideSourceSection?: boolean;
+  shouldHideLogo?: boolean;
+  
+  // Series Customization
+  seriesConfig?: SeriesConfigMap;
+  
+  // Brand Kit Integration
+  brandKitConfig?: ChartBrandKitConfig;
+}
+```
+
+## Core Theme Configuration
+
+### `theme`
+- **Type**: `ThemeName`
+- **Required**: Yes
+- **Description**: The primary visual theme for your chart
+
+```typescript
+type ThemeName = 'graphy' | 'mono' | 'pastel' | 'neon' | 'custom' | 'brandKit';
+```
+
+| Theme | Description | Best For |
+|-------|-------------|----------|
+| `graphy` | Default vibrant theme with rich colors | General purpose, presentations |
+| `mono` | Monochromatic theme with single color family | Professional reports, minimal designs |
+| `pastel` | Soft, muted color palette | Gentle presentations, wellness data |
+| `neon` | Bright, high-contrast colors with glow effects | Dark backgrounds, modern UI |
+| `custom` | User-defined custom colors | Brand-specific styling |
+| `brandKit` | Corporate brand colors and styling | Enterprise applications |
+
+### `palette`
+- **Type**: `string | null`
+- **Required**: Depends on theme
+- **Description**: Theme-specific color palette selection
+
+#### Graphy Palette Options
+```typescript
+type GraphyPalette = 'graphy'; // Single palette option
+```
+
+#### Mono Palette Options  
+```typescript
+type MonoPalette = 'blue' | 'cyan' | 'green' | 'yellow' | 'orange' | 'red' | 'pink' | 'purple' | 'grey';
+```
+
+#### Pastel Palette Options
+```typescript
+type PastelPalette = 'green' | 'cyan' | 'blue' | 'purple' | 'plum' | 'pink' | 'red' | 'orange' | 'yellow';
+```
+
+#### Neon Palette Options
+```typescript
+type NeonPalette = 'cyan' | 'pink' | 'purple' | 'red' | 'orange' | 'yellow' | 'green' | 'blue';
+```
+
+## Border Configuration
+
+### `borderStyle`
+- **Type**: `ChartBorderStyle`
+- **Required**: Yes
+- **Description**: Type of border around the chart
+
+```typescript
+type ChartBorderStyle = 'none' | 'gradient' | 'solid';
+```
+
+### `borderStyleName`
+- **Type**: `BorderStyleName | null`
+- **Required**: When using gradient or solid borders
+- **Description**: Specific border color/style within the theme
+
+#### Graphy Border Styles
+```typescript
+// Gradient options
+type GraphyGradientBorderStyle = 'neon_pink' | 'lilac' | 'blackberry' | 'sun' | 'iceland' | 'sunset' | 'ultraviolet';
+
+// Solid options
+type GraphySolidBorderStyle = 'purple' | 'plum' | 'pink' | 'red' | 'orange' | 'yellow' | 'green' | 'cyan' | 'blue' | 'dark_purple';
+```
+
+### `customBorderStyle`
+- **Type**: `VizColor`
+- **Required**: No
+- **Description**: Custom border color override
+
+## Background Configuration
+
+### `background`
+- **Type**: `ChartBackground`
+- **Required**: No
+- **Description**: Overall chart background theme
+
+```typescript
+type ChartBackground = 'DARK' | 'LIGHT';
+```
+
+### `backgroundStyle`
+- **Type**: `ChartBackgroundStyle`  
+- **Required**: No
+- **Description**: Specific background styling approach
+
+```typescript
+type ChartBackgroundStyle = 'solid' | 'grey' | 'tint' | 'custom' | 'transparent';
+```
+
+| Style | Description | Use Case |
+|-------|-------------|----------|
+| `solid` | Solid background color | Standard charts |
+| `grey` | Subtle grey background | Professional documents |
+| `tint` | Lightly tinted background | Soft presentation style |
+| `custom` | User-defined background color | Brand-specific backgrounds |
+| `transparent` | No background fill | Overlay charts, presentations |
+
+### `customBackgroundColor`
+- **Type**: `string`
+- **Required**: When `backgroundStyle` is `'custom'`
+- **Description**: Hex color code for custom background
+- **Example**: `"#f8f9fa"`, `"#1a1a1a"`
+
+### `hasTransparentBackground`
+- **Type**: `boolean`
+- **Required**: No
+- **Default**: `false`
+- **Description**: Override background to be transparent
+
+### `hasRoundedCorners`
+- **Type**: `boolean`
+- **Required**: No  
+- **Default**: `false`
+- **Description**: Apply rounded corners to chart container
+
+## Typography Configuration
+
+### `font`
+- **Type**: `ChartFont`
+- **Required**: No
+- **Default**: `'modern'`
+- **Description**: Typography style for all chart text
+
+```typescript
+type ChartFont = 'modern' | 'fresh' | 'timeless' | 'technical' | 'brand';
+```
+
+| Font | Description | Characteristics |
+|------|-------------|-----------------|
+| `modern` | Clean, contemporary sans-serif | Default choice, highly readable |
+| `fresh` | Friendly, approachable typography | Casual presentations, consumer-facing |
+| `timeless` | Classic, professional serif | Formal reports, traditional industries |
+| `technical` | Monospace, code-like appearance | Technical data, development contexts |
+| `brand` | Custom brand typography | Corporate identity compliance |
+
+### `textScale`
+- **Type**: `ChartTextScale`
+- **Required**: No
+- **Default**: `'1'`
+- **Description**: Scale factor for all text elements
+
+```typescript
+type ChartTextScale = '0.8' | '1' | '1.2' | '1.4' | '1.6' | '1.8' | '2' | '2.5' | '3' | '4';
+```
+
+| Scale | Use Case | Example Scenario |
+|-------|----------|------------------|
+| `0.8` | Small charts, dense layouts | Dashboard widgets |
+| `1` | Standard size | Default presentation |
+| `1.2`-`1.8` | Larger presentations | Conference slides |
+| `2`-`4` | Very large displays | Large monitors, projectors |
+
+## Interaction Styling
+
+### `highlightStyle`
+- **Type**: `HighlightStyle`
+- **Required**: No
+- **Default**: `'fade-color'`
+- **Description**: How elements are highlighted during interactions
+
+```typescript
+type HighlightStyle = 'grey' | 'fade-color';
+```
+
+| Style | Description | Visual Effect |
+|-------|-------------|---------------|
+| `grey` | Non-selected elements turn grey | High contrast selection |
+| `fade-color` | Non-selected elements fade/dim | Subtle selection |
+
+## Content Visibility
+
+Control which chart elements are displayed:
+
+```typescript
+const minimalAppearance: AppearanceConfig = {
+  theme: 'mono',
+  palette: 'blue',
+  borderStyle: 'none',
+  borderStyleName: null,
+  
+  // Hide non-essential elements
+  shouldHideTitle: true,
+  shouldHideSubtitle: true, 
+  shouldHideCaption: true,
+  shouldHideSourceSection: true,
+  shouldHideLogo: true
+};
+```
+
+### Visibility Options
+
+| Property | Description | Impact |
+|----------|-------------|--------|
+| `shouldHideTitle` | Hide main chart title | Removes title text/editor |
+| `shouldHideSubtitle` | Hide chart subtitle | Removes subtitle area |
+| `shouldHideCaption` | Hide chart caption | Removes caption text below chart |
+| `shouldHideSourceSection` | Hide data source info | Removes source label/link |
+| `shouldHideLogo` | Hide branding logo | Removes logo from chart |
+
+## Theme Examples
+
+### Corporate Professional
+```typescript
+const corporateTheme: AppearanceConfig = {
+  theme: 'mono',
+  palette: 'blue',
+  borderStyle: 'solid',
+  borderStyleName: 'blue',
+  background: 'LIGHT',
+  backgroundStyle: 'solid',
+  font: 'timeless',
+  textScale: '1.2',
+  hasRoundedCorners: false
+};
+```
+
+### Modern Presentation
+```typescript
+const modernTheme: AppearanceConfig = {
+  theme: 'graphy',
+  palette: 'graphy',
+  borderStyle: 'gradient',
+  borderStyleName: 'sunset',
+  background: 'LIGHT',
+  backgroundStyle: 'tint',
+  font: 'modern',
+  textScale: '1.4',
+  hasRoundedCorners: true,
+  highlightStyle: 'fade-color'
+};
+```
+
+### Dark Mode Dashboard
+```typescript
+const darkTheme: AppearanceConfig = {
+  theme: 'neon',
+  palette: 'cyan',
+  borderStyle: 'gradient',
+  borderStyleName: null, // Neon uses auto gradients
+  background: 'DARK',
+  backgroundStyle: 'transparent',
+  font: 'technical',
+  textScale: '1',
+  highlightStyle: 'fade-color'
+};
+```
+
+### Minimal Clean
+```typescript
+const minimalTheme: AppearanceConfig = {
+  theme: 'mono',
+  palette: 'grey',
+  borderStyle: 'none',
+  borderStyleName: null,
+  background: 'LIGHT',
+  backgroundStyle: 'transparent',
+  font: 'modern',
+  textScale: '1',
+  shouldHideTitle: false,
+  shouldHideCaption: true,
+  shouldHideSourceSection: true,
+  shouldHideLogo: true
+};
+```
+
+### Pastel Wellness
+```typescript
+const wellnessTheme: AppearanceConfig = {
+  theme: 'pastel',
+  palette: 'green',
+  borderStyle: 'solid',
+  borderStyleName: 'green',
+  background: 'LIGHT',
+  backgroundStyle: 'tint',
+  font: 'fresh',
+  textScale: '1.2',
+  hasRoundedCorners: true,
+  highlightStyle: 'fade-color'
+};
+```
+
+## Advanced Customization
+
+### Custom Brand Colors
+
+```typescript
+const customBrandTheme: AppearanceConfig = {
+  theme: 'custom',
+  palette: null,
+  borderStyle: 'solid',
+  borderStyleName: null,
+  customBorderStyle: '#FF6B35', // Brand orange
+  background: 'LIGHT',
+  backgroundStyle: 'custom',
+  customBackgroundColor: '#F8F9FA',
+  font: 'brand', // Requires brand font setup
+  textScale: '1.2'
+};
+```
+
+### Series-Level Customization
+
+```typescript
+const seriesCustomTheme: AppearanceConfig = {
+  theme: 'graphy',
+  palette: 'graphy',
+  borderStyle: 'none',
+  borderStyleName: null,
+  seriesConfig: {
+    'revenue': { 
+      color: '#2563eb',        // Custom blue for revenue
+      fillType: 'solid'        // Solid fill
+    },
+    'profit': { 
+      color: '#16a34a',        // Custom green for profit  
+      fillType: 'gradient'     // Gradient fill
+    },
+    'expenses': {
+      color: '#dc2626',        // Custom red for expenses
+      fillType: 'pattern',     // Pattern fill
+      patternType: 'diagonal'  // Diagonal stripes
+    }
+  }
+};
+```
+
+### Brand Kit Integration
+
+```typescript
+const brandKitTheme: AppearanceConfig = {
+  theme: 'brandKit',
+  palette: null,
+  borderStyle: 'solid',
+  borderStyleName: null,
+  brandKitConfig: {
+    primaryColor: '#1e40af',
+    secondaryColor: '#3b82f6', 
+    accentColor: '#60a5fa',
+    backgroundColor: '#f8fafc',
+    textColor: '#1e293b',
+    logoUrl: '/assets/company-logo.svg',
+    fontFamily: 'Inter, system-ui, sans-serif'
+  }
+};
+```
+
+## Responsive Appearance
+
+### Screen Size Adaptation
+
+```typescript
+function getResponsiveAppearance(screenSize: 'mobile' | 'tablet' | 'desktop'): AppearanceConfig {
+  const base: AppearanceConfig = {
+    theme: 'graphy',
+    palette: 'graphy',
+    borderStyle: 'solid',
+    borderStyleName: 'blue',
+    background: 'LIGHT',
+    font: 'modern'
+  };
+  
+  switch (screenSize) {
+    case 'mobile':
+      return {
+        ...base,
+        textScale: '0.8',
+        borderStyle: 'none',      // Remove border on mobile
+        shouldHideCaption: true,   // Hide caption on small screens
+        shouldHideSourceSection: true
+      };
+      
+    case 'tablet':
+      return {
+        ...base,
+        textScale: '1',
+        borderStyle: 'solid'
+      };
+      
+    case 'desktop':
+      return {
+        ...base,
+        textScale: '1.2',
+        hasRoundedCorners: true
+      };
+  }
+}
+```
+
+### Context-Aware Themes
+
+```typescript
+function getContextualTheme(context: 'dashboard' | 'presentation' | 'report' | 'embed'): AppearanceConfig {
+  switch (context) {
+    case 'dashboard':
+      return {
+        theme: 'mono',
+        palette: 'blue',
+        borderStyle: 'none',
+        borderStyleName: null,
+        backgroundStyle: 'transparent',
+        textScale: '0.8',
+        shouldHideTitle: true,
+        shouldHideCaption: true
+      };
+      
+    case 'presentation':
+      return {
+        theme: 'graphy',
+        palette: 'graphy',
+        borderStyle: 'gradient',
+        borderStyleName: 'sunset',
+        backgroundStyle: 'tint',
+        textScale: '1.6',
+        hasRoundedCorners: true
+      };
+      
+    case 'report':
+      return {
+        theme: 'mono',
+        palette: 'grey',
+        borderStyle: 'solid', 
+        borderStyleName: 'grey',
+        backgroundStyle: 'solid',
+        font: 'timeless',
+        textScale: '1'
+      };
+      
+    case 'embed':
+      return {
+        theme: 'custom',
+        palette: null,
+        borderStyle: 'none',
+        borderStyleName: null,
+        backgroundStyle: 'transparent',
+        textScale: '1',
+        shouldHideLogo: true
+      };
+  }
+}
+```
+
+## Performance Considerations
+
+### Efficient Theme Selection
+
+```typescript
+// ✅ Efficient: Use predefined themes
+const efficientTheme: AppearanceConfig = {
+  theme: 'graphy',
+  palette: 'graphy',
+  borderStyle: 'solid',
+  borderStyleName: 'blue'
+};
+
+// ❌ Less efficient: Heavy customization
+const heavyTheme: AppearanceConfig = {
+  theme: 'custom',
+  palette: null,
+  borderStyle: 'gradient',
+  customBackgroundColor: '#ffffff',
+  seriesConfig: {
+    // Individual series customization for many series
+  }
+};
+```
+
+### Caching Theme Configurations
+
+```typescript
+// Cache computed themes
+const themeCache = new Map<string, AppearanceConfig>();
+
+function getCachedTheme(themeId: string): AppearanceConfig {
+  if (!themeCache.has(themeId)) {
+    themeCache.set(themeId, computeTheme(themeId));
+  }
+  return themeCache.get(themeId)!;
+}
+```
+
+## Validation and Best Practices
+
+### Theme Compatibility
+
+```typescript
+// ✅ Valid theme combinations
+const validCombinations: AppearanceConfig[] = [
+  {
+    theme: 'graphy',
+    palette: 'graphy',
+    borderStyle: 'gradient',
+    borderStyleName: 'sunset'
+  },
+  {
+    theme: 'mono',
+    palette: 'blue', 
+    borderStyle: 'solid',
+    borderStyleName: 'blue'
+  },
+  {
+    theme: 'neon',
+    palette: 'cyan',
+    borderStyle: 'gradient',
+    borderStyleName: null // Neon auto-generates gradients
+  }
+];
+
+// ❌ Invalid combinations (will be corrected automatically)
+const invalidCombination: AppearanceConfig = {
+  theme: 'neon',
+  palette: 'graphy', // Wrong palette for neon theme
+  borderStyle: 'solid',
+  borderStyleName: 'sunset' // Gradient name with solid border
+};
+```
+
+### Accessibility Guidelines
+
+```typescript
+const accessibleTheme: AppearanceConfig = {
+  theme: 'mono',
+  palette: 'blue',
+  borderStyle: 'solid',
+  borderStyleName: 'blue',
+  background: 'LIGHT',
+  backgroundStyle: 'solid',
+  textScale: '1.2', // Larger text for readability
+  highlightStyle: 'grey', // High contrast selection
+  font: 'modern' // Clean, readable font
+};
+```
+
+### Common Mistakes to Avoid
+
+```typescript
+// ❌ Inconsistent styling
+const inconsistent: AppearanceConfig = {
+  theme: 'pastel',
+  palette: 'green',
+  borderStyle: 'gradient',
+  borderStyleName: 'neon_pink', // Neon border with pastel theme
+  background: 'DARK' // Dark background with pastel theme
+};
+
+// ✅ Consistent styling  
+const consistent: AppearanceConfig = {
+  theme: 'pastel',
+  palette: 'green',
+  borderStyle: 'solid',
+  borderStyleName: 'green', // Matching border
+  background: 'LIGHT' // Appropriate background
+};
+```
+
+### Testing Appearance Configurations
+
+```typescript
+// Test theme across different chart types
+const testTheme: AppearanceConfig = {
+  theme: 'graphy',
+  palette: 'graphy',
+  borderStyle: 'solid',
+  borderStyleName: 'blue'
+};
+
+const chartTypes = ['bar', 'line', 'pie', 'scatter'] as const;
+
+chartTypes.forEach(type => {
+  // Test theme with different chart types
+  validateAppearance(testTheme, type);
+});
+```

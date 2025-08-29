@@ -1,0 +1,619 @@
+---
+title: "DatasetConfig"
+description: "Configuration object that defines how raw data should be interpreted, processed, and displayed in charts."
+---
+
+# DatasetConfig
+
+`DatasetConfig` defines how your raw data should be interpreted, processed, and transformed for visualization. It describes the structure and characteristics of your data columns, along with processing instructions.
+
+## Type Definition
+
+```typescript
+interface DatasetConfig {
+  properties: Property[];
+  isDataHorizontal: boolean;
+  shouldAggregate?: boolean;
+  groupByTimeUnit?: TimeUnit;
+  sortBy?: SortByConfig;
+  rollingDateFilter?: RollingDateFilter | null;
+  description?: string;
+  dateFormat?: VizLocale;
+}
+```
+
+## Core Properties
+
+### `properties`
+- **Type**: `Property[]`
+- **Required**: Yes
+- **Description**: Array of column definitions that describe each data column
+
+Each property defines:
+- Column identification (`key`)
+- Display information (`label`)
+- Data type and formatting (`dataType`)
+- Visibility settings (`isHidden`)
+- Aggregation behavior (`aggregation`)
+
+### `isDataHorizontal`
+- **Type**: `boolean`
+- **Required**: Yes
+- **Description**: Specifies the orientation of your data layout
+
+| Value | Description | Example |
+|-------|-------------|---------|
+| `false` | Each row is a data point, columns are properties | Standard table format |
+| `true` | Each column is a data point, rows are properties | Transposed/pivoted data |
+
+## Optional Processing Properties
+
+### `shouldAggregate`
+- **Type**: `boolean`
+- **Required**: No
+- **Default**: Determined by chart type and data
+- **Description**: Whether to aggregate data points that share the same categorical values
+- **Use Cases**: 
+  - Multiple rows with same category need to be combined
+  - Time-series data needs grouping
+  - Raw transaction data needs summarization
+
+### `groupByTimeUnit`
+- **Type**: `TimeUnit`
+- **Required**: No
+- **Description**: Time unit for grouping temporal data
+
+```typescript
+type TimeUnit = 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour';
+```
+
+### `sortBy`
+- **Type**: `SortByConfig`
+- **Required**: No
+- **Description**: Configuration for sorting data before visualization
+
+```typescript
+interface SortByConfig {
+  propertyKey: string;    // Column to sort by
+  direction: 'asc' | 'desc'; // Sort direction
+}
+```
+
+### `rollingDateFilter`
+- **Type**: `RollingDateFilter | null`
+- **Required**: No
+- **Description**: Filter data to show only recent time periods
+
+```typescript
+interface RollingDateFilter {
+  timeUnit: TimeUnit;     // Unit of time (e.g., 'month')
+  value: number;          // Number of units (e.g., 6 for "last 6 months")
+}
+```
+
+### `description`
+- **Type**: `string`
+- **Required**: No
+- **Description**: Human-readable description of the dataset
+- **Use Cases**: AI-generated summaries, documentation, tooltips
+
+### `dateFormat`
+- **Type**: `VizLocale`
+- **Required**: No
+- **Description**: Locale for date formatting
+
+```typescript
+type VizLocale = 'EN_GB' | 'EN_US';
+```
+
+## Property Definition
+
+### Property Interface
+
+```typescript
+interface Property {
+  key: string;
+  label?: string;
+  dataType?: DataTypeConfig;
+  isHidden?: boolean;
+  aggregation?: AggregationFunction;
+}
+```
+
+### Property Fields
+
+#### `key`
+- **Type**: `string`
+- **Required**: Yes
+- **Description**: Unique identifier that matches a column in your raw data
+- **Example**: `"revenue"`, `"product_name"`, `"date"`
+
+#### `label`
+- **Type**: `string`
+- **Required**: No
+- **Default**: Uses the `key` value
+- **Description**: Human-readable name for display in charts, legends, and tooltips
+- **Example**: `"Total Revenue"`, `"Product Name"`, `"Sale Date"`
+
+#### `dataType`
+- **Type**: `DataTypeConfig`
+- **Required**: No
+- **Default**: Auto-detected from data
+- **Description**: Specifies how the data should be interpreted and formatted
+
+#### `isHidden`
+- **Type**: `boolean`
+- **Required**: No
+- **Default**: `false`
+- **Description**: Whether to exclude this column from visualization while keeping it available for calculations
+
+#### `aggregation`
+- **Type**: `AggregationFunction`
+- **Required**: No
+- **Description**: How to combine multiple values when aggregating data
+
+```typescript
+type AggregationFunction = 'sum' | 'average' | 'count' | 'min' | 'max' | 'first' | 'last';
+```
+
+## Data Type Configuration
+
+### DataTypeConfig Union
+
+```typescript
+type DataTypeConfig = DateConfig | CurrencyConfig | OtherDataTypeConfig;
+```
+
+### Date Configuration
+
+```typescript
+interface DateConfig {
+  type: 'date' | 'datetime' | 'year' | 'month_year' | 'month' | 'day_month' | 'weekly_date_range' | 'weekly_date_range_with_year' | 'quarter';
+  dateFormat?: string; // Template like 'dd-mm-yyyy'
+}
+```
+
+### Currency Configuration
+
+```typescript
+interface CurrencyConfig {
+  type: 'currency';
+  iso: CurrencyIso; // Three-letter currency code
+}
+```
+
+### Other Data Types
+
+```typescript
+interface OtherDataTypeConfig {
+  type: 'text' | 'boolean' | 'decimal' | 'duration' | 'integer' | 'percentage';
+}
+```
+
+## Usage Examples
+
+### Basic Sales Dataset
+
+```typescript
+const salesConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'product',
+      label: 'Product Name',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'sales',
+      label: 'Sales Revenue',
+      dataType: { type: 'currency', iso: 'usd' },
+      aggregation: 'sum'
+    },
+    {
+      key: 'quantity',
+      label: 'Units Sold',
+      dataType: { type: 'integer' },
+      aggregation: 'sum'
+    }
+  ],
+  isDataHorizontal: false,
+  shouldAggregate: true
+};
+```
+
+### Time Series Configuration
+
+```typescript
+const timeSeriesConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'date',
+      label: 'Date',
+      dataType: { 
+        type: 'date', 
+        dateFormat: 'yyyy-mm-dd' 
+      }
+    },
+    {
+      key: 'temperature',
+      label: 'Temperature (°C)',
+      dataType: { type: 'decimal' },
+      aggregation: 'average'
+    },
+    {
+      key: 'humidity',
+      label: 'Humidity (%)',
+      dataType: { type: 'percentage' },
+      aggregation: 'average'
+    }
+  ],
+  isDataHorizontal: false,
+  groupByTimeUnit: 'day',
+  rollingDateFilter: {
+    timeUnit: 'month',
+    value: 3 // Last 3 months
+  },
+  sortBy: {
+    propertyKey: 'date',
+    direction: 'asc'
+  }
+};
+```
+
+### Financial Data with Hidden Columns
+
+```typescript
+const financialConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'company',
+      label: 'Company',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'revenue',
+      label: 'Revenue',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'expenses',
+      label: 'Expenses',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'profit',
+      label: 'Net Profit',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'internal_id',
+      label: 'ID',
+      dataType: { type: 'text' },
+      isHidden: true // Keep for calculations but don't show
+    }
+  ],
+  isDataHorizontal: false,
+  sortBy: {
+    propertyKey: 'revenue',
+    direction: 'desc'
+  }
+};
+```
+
+### Multi-Currency International Data
+
+```typescript
+const internationalConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'region',
+      label: 'Sales Region',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'revenue_usd',
+      label: 'Revenue (USD)',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'revenue_eur',
+      label: 'Revenue (EUR)',
+      dataType: { type: 'currency', iso: 'eur' }
+    },
+    {
+      key: 'revenue_gbp',
+      label: 'Revenue (GBP)',
+      dataType: { type: 'currency', iso: 'gbp' }
+    }
+  ],
+  isDataHorizontal: false,
+  dateFormat: 'EN_US'
+};
+```
+
+## Horizontal Data Layout
+
+### When to Use `isDataHorizontal: true`
+
+Use horizontal layout when your data is structured with categories as columns:
+
+```typescript
+// Raw data structure (horizontal)
+const horizontalData: RawData = {
+  rows: [
+    { metric: 'Sales', jan: 1000, feb: 1200, mar: 1500 },
+    { metric: 'Costs', jan: 600, feb: 700, mar: 800 }
+  ]
+};
+
+// Configuration for horizontal data
+const horizontalConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'metric',
+      label: 'Metric Type',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'jan',
+      label: 'January',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'feb',
+      label: 'February',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'mar',
+      label: 'March',
+      dataType: { type: 'currency', iso: 'usd' }
+    }
+  ],
+  isDataHorizontal: true // Data points are in columns
+};
+```
+
+## Data Aggregation
+
+### Aggregation Functions
+
+| Function | Description | Best For |
+|----------|-------------|----------|
+| `sum` | Add all values | Revenue, quantities, counts |
+| `average` | Mathematical mean | Ratings, temperatures, percentages |
+| `count` | Count of non-null values | Number of transactions, responses |
+| `min` | Smallest value | Lowest price, earliest date |
+| `max` | Largest value | Highest score, latest date |
+| `first` | First non-null value | Initial status, opening price |
+| `last` | Last non-null value | Final status, closing price |
+
+### Aggregation Example
+
+```typescript
+// Raw data with duplicate categories
+const rawTransactionData: RawData = {
+  rows: [
+    { category: 'Electronics', amount: 1200, count: 1 },
+    { category: 'Electronics', amount: 800, count: 1 },
+    { category: 'Clothing', amount: 300, count: 1 },
+    { category: 'Clothing', amount: 450, count: 1 }
+  ]
+};
+
+// Configuration with aggregation
+const aggregatedConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'category',
+      label: 'Product Category',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'amount',
+      label: 'Total Sales',
+      dataType: { type: 'currency', iso: 'usd' },
+      aggregation: 'sum' // Will combine: Electronics: 2000, Clothing: 750
+    },
+    {
+      key: 'count',
+      label: 'Transaction Count',
+      dataType: { type: 'integer' },
+      aggregation: 'sum' // Will combine: Electronics: 2, Clothing: 2
+    }
+  ],
+  isDataHorizontal: false,
+  shouldAggregate: true
+};
+```
+
+## Date and Time Handling
+
+### Date Formats
+
+Common date format patterns:
+
+```typescript
+const dateFormats = {
+  'yyyy-mm-dd': '2024-03-15',
+  'dd/mm/yyyy': '15/03/2024',
+  'mm/dd/yyyy': '03/15/2024',
+  'dd-mm-yyyy': '15-03-2024',
+  'yyyy/mm/dd': '2024/03/15'
+};
+```
+
+### Time-based Grouping
+
+```typescript
+const timeGroupingConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'timestamp',
+      label: 'Date',
+      dataType: { 
+        type: 'datetime',
+        dateFormat: 'yyyy-mm-dd hh:mm:ss'
+      }
+    },
+    {
+      key: 'value',
+      label: 'Measurement',
+      dataType: { type: 'decimal' },
+      aggregation: 'average'
+    }
+  ],
+  isDataHorizontal: false,
+  groupByTimeUnit: 'hour', // Group by hour
+  shouldAggregate: true
+};
+```
+
+### Rolling Date Filters
+
+```typescript
+// Show only last 30 days
+const recentDataConfig: DatasetConfig = {
+  // ... properties
+  rollingDateFilter: {
+    timeUnit: 'day',
+    value: 30
+  }
+};
+
+// Show only last 6 months
+const quarterlyConfig: DatasetConfig = {
+  // ... properties  
+  rollingDateFilter: {
+    timeUnit: 'month',
+    value: 6
+  }
+};
+```
+
+## Advanced Patterns
+
+### Multi-Level Categories
+
+```typescript
+const hierarchicalConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'region',
+      label: 'Sales Region',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'country',
+      label: 'Country',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'city',
+      label: 'City',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'sales',
+      label: 'Sales',
+      dataType: { type: 'currency', iso: 'usd' },
+      aggregation: 'sum'
+    }
+  ],
+  isDataHorizontal: false,
+  shouldAggregate: true,
+  sortBy: {
+    propertyKey: 'sales',
+    direction: 'desc'
+  }
+};
+```
+
+### Calculated Fields
+
+```typescript
+// Use hidden fields for calculations
+const calculatedConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'product',
+      label: 'Product',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'revenue',
+      label: 'Revenue',
+      dataType: { type: 'currency', iso: 'usd' }
+    },
+    {
+      key: 'cost',
+      label: 'Cost',
+      dataType: { type: 'currency', iso: 'usd' },
+      isHidden: true // Hidden but available for profit calculation
+    },
+    {
+      key: 'profit',
+      label: 'Profit', // revenue - cost (calculated externally)
+      dataType: { type: 'currency', iso: 'usd' }
+    }
+  ],
+  isDataHorizontal: false
+};
+```
+
+## Validation and Best Practices
+
+### Property Key Validation
+- Keys must match columns in your `RawData`
+- Use consistent naming conventions
+- Avoid special characters in keys
+
+### Data Type Alignment
+- Ensure `dataType` matches your actual data
+- Use appropriate aggregation functions
+- Test with sample data first
+
+### Performance Considerations
+- Limit properties to what's needed for visualization
+- Use `isHidden` for auxiliary data
+- Consider data size when enabling aggregation
+
+### Common Mistakes to Avoid
+
+```typescript
+// ❌ Mismatched keys
+const badConfig: DatasetConfig = {
+  properties: [
+    { key: 'product_name' } // But data has 'product'
+  ],
+  isDataHorizontal: false
+};
+
+// ❌ Wrong aggregation function
+const wrongAggregation: DatasetConfig = {
+  properties: [
+    {
+      key: 'category',
+      aggregation: 'sum' // Can't sum text values
+    }
+  ],
+  isDataHorizontal: false
+};
+
+// ✅ Correct configuration
+const goodConfig: DatasetConfig = {
+  properties: [
+    {
+      key: 'product', // Matches data exactly
+      label: 'Product Name',
+      dataType: { type: 'text' }
+    },
+    {
+      key: 'sales',
+      label: 'Sales',
+      dataType: { type: 'currency', iso: 'usd' },
+      aggregation: 'sum' // Appropriate for numeric data
+    }
+  ],
+  isDataHorizontal: false
+};
+```

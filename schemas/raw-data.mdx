@@ -1,0 +1,348 @@
+---
+title: "RawData"
+description: "The fundamental data structure for chart input. Defines the tabular data format that powers all visualizations."
+---
+
+# RawData
+
+`RawData` is the primary data structure for providing chart data to the Graphy Core SDK. It represents tabular data in a rows-and-columns format that can be transformed into various chart types.
+
+## Type Definition
+
+```typescript
+interface RawData {
+  rows: RawDataRow[];
+}
+
+interface RawDataRow {
+  [key: string]: RawDataCell;
+  __graphyExternalId__?: string;
+}
+
+type RawDataCell = string | number | null;
+```
+
+## Properties
+
+### `rows`
+- **Type**: `RawDataRow[]`
+- **Required**: Yes
+- **Description**: Array of data rows, where each row represents a data point or record
+
+Each row is an object where:
+- Keys represent column names/identifiers
+- Values can be strings, numbers, or null
+- Column structure should be consistent across all rows
+
+### `__graphyExternalId__` (Row Property)
+- **Type**: `string`
+- **Required**: No
+- **Description**: Optional external identifier for linking rows to external systems
+- **Use Cases**: 
+  - Tracking data sources
+  - Maintaining references when data updates
+  - Integration with external databases or APIs
+
+## Data Types
+
+### Supported Cell Values
+
+| Type | Example | Use Case |
+|------|---------|----------|
+| `string` | `"Product A"`, `"Q1 2024"` | Categories, labels, text data |
+| `number` | `12500`, `3.14`, `-100` | Numeric values, measurements |
+| `null` | `null` | Missing or empty values |
+
+## Usage Examples
+
+### Basic Sales Data
+
+```typescript
+const salesData: RawData = {
+  rows: [
+    { product: "Laptop", sales: 15000, profit: 3500, quarter: "Q1" },
+    { product: "Phone", sales: 25000, profit: 8000, quarter: "Q1" },
+    { product: "Tablet", sales: 8500, profit: 2100, quarter: "Q1" }
+  ]
+};
+```
+
+### Time Series Data
+
+```typescript
+const timeSeriesData: RawData = {
+  rows: [
+    { date: "2024-01-01", temperature: 15.5, humidity: 65, rainfall: 2.3 },
+    { date: "2024-01-02", temperature: 18.2, humidity: 72, rainfall: 0.0 },
+    { date: "2024-01-03", temperature: 12.1, humidity: 85, rainfall: 5.1 }
+  ]
+};
+```
+
+### Financial Data with Missing Values
+
+```typescript
+const financialData: RawData = {
+  rows: [
+    { company: "TechCorp", revenue: 1200000, profit: 250000, employees: 450 },
+    { company: "StartupXYZ", revenue: 45000, profit: null, employees: 12 },
+    { company: "BigCorp", revenue: 5000000, profit: 800000, employees: 2500 }
+  ]
+};
+```
+
+### Data with External IDs
+
+```typescript
+const externalData: RawData = {
+  rows: [
+    { 
+      region: "North", 
+      sales: 150000, 
+      __graphyExternalId__: "region_001" 
+    },
+    { 
+      region: "South", 
+      sales: 120000, 
+      __graphyExternalId__: "region_002" 
+    },
+    { 
+      region: "East", 
+      sales: 180000, 
+      __graphyExternalId__: "region_003" 
+    }
+  ]
+};
+```
+
+## Data Preparation Guidelines
+
+### Column Consistency
+Ensure all rows have the same column structure:
+
+```typescript
+// ✅ Good: Consistent columns
+const goodData: RawData = {
+  rows: [
+    { name: "A", value: 100, category: "X" },
+    { name: "B", value: 200, category: "Y" },
+    { name: "C", value: 150, category: "X" }
+  ]
+};
+
+// ❌ Avoid: Inconsistent columns
+const problematicData: RawData = {
+  rows: [
+    { name: "A", value: 100 },
+    { name: "B", amount: 200, category: "Y" }, // Different column name
+    { title: "C", value: 150, category: "X" }  // Different column name
+  ]
+};
+```
+
+### Handling Missing Data
+Use `null` for missing values rather than empty strings or undefined:
+
+```typescript
+// ✅ Good: Use null for missing values
+const dataWithMissing: RawData = {
+  rows: [
+    { product: "A", sales: 1000, forecast: 1200 },
+    { product: "B", sales: 2000, forecast: null }, // Missing forecast
+    { product: "C", sales: 1500, forecast: 1800 }
+  ]
+};
+
+// ❌ Avoid: Empty strings or undefined
+const problematic: RawData = {
+  rows: [
+    { product: "A", sales: 1000, forecast: 1200 },
+    { product: "B", sales: 2000, forecast: "" },        // Empty string
+    { product: "C", sales: 1500, forecast: undefined }  // Undefined
+  ]
+};
+```
+
+### Numeric Data Types
+Keep numeric data as numbers, not strings:
+
+```typescript
+// ✅ Good: Numbers as numbers
+const numericData: RawData = {
+  rows: [
+    { category: "A", value: 100, percentage: 0.25 },
+    { category: "B", value: 200, percentage: 0.50 }
+  ]
+};
+
+// ❌ Avoid: Numbers as strings (unless intentional)
+const stringNumbers: RawData = {
+  rows: [
+    { category: "A", value: "100", percentage: "25%" }, // Will need parsing
+    { category: "B", value: "200", percentage: "50%" }
+  ]
+};
+```
+
+## Common Patterns
+
+### Pivot/Unpivot Data
+Sometimes you need to transform data structure:
+
+```typescript
+// Wide format (multiple value columns)
+const wideData: RawData = {
+  rows: [
+    { month: "Jan", desktop: 1200, mobile: 800, tablet: 300 },
+    { month: "Feb", desktop: 1500, mobile: 900, tablet: 350 }
+  ]
+};
+
+// Long format (single value column with category)
+const longData: RawData = {
+  rows: [
+    { month: "Jan", device: "desktop", visits: 1200 },
+    { month: "Jan", device: "mobile", visits: 800 },
+    { month: "Jan", device: "tablet", visits: 300 },
+    { month: "Feb", device: "desktop", visits: 1500 },
+    { month: "Feb", device: "mobile", visits: 900 },
+    { month: "Feb", device: "tablet", visits: 350 }
+  ]
+};
+```
+
+### Aggregated vs Raw Data
+Choose the appropriate level of detail for your visualization:
+
+```typescript
+// Daily data (high granularity)
+const dailyData: RawData = {
+  rows: [
+    { date: "2024-01-01", sales: 1200 },
+    { date: "2024-01-02", sales: 1500 },
+    { date: "2024-01-03", sales: 900 }
+    // ... 365 rows
+  ]
+};
+
+// Monthly data (aggregated)
+const monthlyData: RawData = {
+  rows: [
+    { month: "2024-01", sales: 45000 },
+    { month: "2024-02", sales: 52000 },
+    { month: "2024-03", sales: 48000 }
+  ]
+};
+```
+
+## Integration Examples
+
+### From API Response
+
+```typescript
+// Transform API response to RawData
+async function fetchChartData(): Promise<RawData> {
+  const response = await fetch('/api/sales-data');
+  const apiData = await response.json();
+  
+  return {
+    rows: apiData.results.map(item => ({
+      product: item.product_name,
+      sales: item.total_sales,
+      profit: item.net_profit,
+      region: item.sales_region,
+      __graphyExternalId__: item.id
+    }))
+  };
+}
+```
+
+### From CSV Data
+
+```typescript
+// Transform CSV data to RawData
+function csvToRawData(csvString: string): RawData {
+  const lines = csvString.split('\n');
+  const headers = lines[0].split(',');
+  
+  const rows = lines.slice(1).map(line => {
+    const values = line.split(',');
+    const row: { [key: string]: string | number | null } = {};
+    
+    headers.forEach((header, index) => {
+      const value = values[index];
+      // Convert to number if possible, otherwise keep as string
+      row[header.trim()] = isNaN(Number(value)) ? value.trim() : Number(value);
+    });
+    
+    return row;
+  });
+  
+  return { rows };
+}
+```
+
+### From Database Results
+
+```typescript
+// Transform database query results to RawData
+function dbResultsToRawData(results: any[]): RawData {
+  return {
+    rows: results.map(row => ({
+      // Map database columns to chart-friendly names
+      category: row.category_name,
+      value: row.numeric_value,
+      date: row.created_at.toISOString().split('T')[0], // Format date
+      __graphyExternalId__: row.id.toString()
+    }))
+  };
+}
+```
+
+## Performance Considerations
+
+### Data Size Limits
+- **Recommended**: Up to 10,000 rows for optimal performance
+- **Maximum**: 50,000 rows (may impact interactivity)
+- **Large datasets**: Consider server-side aggregation or pagination
+
+### Memory Usage
+- Each cell value consumes memory
+- Use appropriate data types (numbers vs strings)
+- Consider data sampling for very large datasets
+
+### Processing Efficiency
+- Consistent column structure improves processing speed
+- Avoid deep object nesting in cell values
+- Use `__graphyExternalId__` for efficient row tracking
+
+## Validation
+
+The SDK automatically validates `RawData` structure:
+
+```typescript
+// These will be flagged as invalid:
+const invalidData = {
+  // Missing 'rows' property
+  data: [{ a: 1, b: 2 }]
+};
+
+const invalidRows = {
+  rows: "not an array" // 'rows' must be an array
+};
+
+const invalidCells = {
+  rows: [
+    { name: "test", value: { nested: "object" } } // Objects not allowed as cell values
+  ]
+};
+```
+
+## Best Practices
+
+1. **Consistent Structure**: Keep column names and types consistent across all rows
+2. **Appropriate Types**: Use numbers for numeric data, strings for text, null for missing values
+3. **Meaningful Names**: Use descriptive column names that match your DatasetConfig
+4. **External IDs**: Include `__graphyExternalId__` when integrating with external systems
+5. **Data Quality**: Clean your data before passing to the chart components
+6. **Performance**: Consider data size and complexity for optimal rendering performance

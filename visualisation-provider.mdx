@@ -1,0 +1,185 @@
+---
+title: "VisualisationProvider"
+description: "The root component that provides chart data and configuration context to all child components"
+---
+
+# VisualisationProvider
+
+The `VisualisationProvider` is the foundational component of the Graphy Core charting library. It serves as the source of truth for all chart properties and makes them available throughout the component tree via React Context.
+
+## Overview
+
+`VisualisationProvider` processes your raw data, chart configuration, and appearance settings to create a computed state that is optimized for rendering. It handles:
+
+- Data processing and transformation
+- Chart configuration computation
+- Theme and appearance management
+- Context provision for child components
+
+## Basic Usage
+
+```typescript
+import { VisualisationProvider, VisualisationController } from '@graphylib/core';
+
+function MyChart() {
+  const data = {
+    rows: [
+      { category: 'A', value: 100 },
+      { category: 'B', value: 200 },
+      { category: 'C', value: 150 }
+    ]
+  };
+
+  const config = {
+    type: 'bar' as const,
+    barPosition: 'grouped' as const
+  };
+
+  const datasetConfig = {
+    properties: [
+      { key: 'category', label: 'Category', dataType: { type: 'text' } },
+      { key: 'value', label: 'Value', dataType: { type: 'integer' } }
+    ],
+    isDataHorizontal: false
+  };
+
+  return (
+    <VisualisationProvider
+      data={data}
+      visualisationConfig={config}
+      datasetConfig={datasetConfig}
+    >
+      <VisualisationController
+        renderTitle={({ title }) => <h2>{title}</h2>}
+        stickerPaths={{}}
+      />
+    </VisualisationProvider>
+  );
+}
+```
+
+## Props
+
+### Core Data Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `RawData` | No | The raw data to visualize. Defaults to empty data |
+| `datasetConfig` | `DatasetConfig` | No | Configuration for data columns and processing |
+| `visualisationConfig` | `VisualisationConfig` | No | Chart type and visualization settings |
+
+### Appearance Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `customAppearanceConfig` | `AppearanceConfig` | No | Chart theme and styling configuration |
+| `boardAppearanceConfig` | `AppearanceConfig` | No | Board-level appearance settings |
+| `boardBackground` | `ChartBackground` | No | Board background theme ('DARK' or 'LIGHT') |
+| `shouldUseBoardAppearance` | `boolean` | No | Whether to use board appearance settings |
+| `brandKit` | `AppliedBrandKit` | No | Custom brand styling configuration |
+
+### Content Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `string` | No | Chart title text |
+| `titleDocument` | `JSONContent` | No | Rich text document for chart title |
+| `caption` | `JSONContent` | No | Rich text document for chart caption |
+| `sourceLabel` | `string \| null` | No | Data source label |
+| `sourceUrl` | `string \| null` | No | Data source URL |
+
+### Layout Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `width` | `number` | No | Chart width in pixels. Defaults to 600 |
+| `height` | `number` | No | Chart height in pixels. Defaults to 400 |
+
+### Additional Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `annotations` | `Annotations` | No | Chart annotations (stickers, tooltips, highlights, etc.) |
+| `numberFormat` | `NumberFormat` | No | Number formatting configuration |
+| `datasetSource` | `DatasetSource` | No | Source information for the dataset |
+| `parserName` | `string` | No | Name of the parser used to process the data |
+| `children` | `ReactNode` | No | Child components to render within the provider |
+
+## Data Structure
+
+### RawData
+
+```typescript
+interface RawData {
+  rows: Array<{
+    [key: string]: string | number | null;
+    __graphyExternalId__?: string; // Optional external identifier
+  }>;
+}
+```
+
+### DatasetConfig
+
+```typescript
+interface DatasetConfig {
+  properties: Property[];           // Column definitions
+  isDataHorizontal: boolean;       // Whether data is laid out horizontally
+  shouldAggregate?: boolean;       // Whether to aggregate data
+  groupByTimeUnit?: TimeUnit;      // Time grouping unit
+  sortBy?: SortByConfig;           // Sorting configuration
+  rollingDateFilter?: RollingDateFilter; // Date filtering
+  description?: string;            // AI-generated description
+  dateFormat?: VizLocale;         // Date format locale
+}
+```
+
+### Property
+
+```typescript
+interface Property {
+  key: string;                    // Unique column key
+  label?: string;                 // Display name
+  dataType?: DataTypeConfig;      // Data type and formatting
+  isHidden?: boolean;             // Whether to hide from chart
+  aggregation?: AggregationFunction; // Aggregation method
+}
+```
+
+## Context Access
+
+Use the `useVisualisationStore` hook to access chart data and configuration:
+
+```typescript
+import { useVisualisationStore } from '@graphylib/core';
+
+function MyChartComponent() {
+  // Get specific values with selectors for optimal performance
+  const chartType = useVisualisationStore(state => state.config.type);
+  const chartData = useVisualisationStore(state => state.chartData);
+  const palette = useVisualisationStore(state => state.vizPalette);
+  
+  // Access the ref for imperative operations
+  const ref = useVisualisationStore(state => state.ref);
+  
+  return <div>Chart Type: {chartType}</div>;
+}
+```
+
+## Data Processing
+
+The provider automatically processes your raw data through several stages:
+
+1. **Property Computation**: Analyzes data types and generates computed properties
+2. **Data View**: Applies filtering, grouping, and sorting based on configuration
+3. **Chart Data**: Transforms data into the format required for visualization
+4. **Appearance**: Computes final appearance settings from themes and configs
+
+## Performance
+
+- Uses `useMemo` for expensive computations to prevent unnecessary recalculations
+- Provides selector-based access via `useVisualisationStore` for optimal re-rendering
+- Maintains a stable reference for imperative access without causing re-renders
+
+## Type Safety
+
+All props are fully typed with TypeScript, ensuring type safety across your entire charting implementation. The provider validates and transforms data according to the specified schemas.
