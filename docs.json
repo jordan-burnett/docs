@@ -1,5 +1,6 @@
 {
   "name": "Graphy Core SDK",
+  "theme": "mint",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -7,7 +8,7 @@
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0369a1",
-    "light": "#38bdf8", 
+    "light": "#38bdf8",
     "dark": "#1e40af",
     "anchors": {
       "from": "#0369a1",
@@ -37,7 +38,7 @@
       "url": "https://docs.graphy.com"
     },
     {
-      "name": "Community", 
+      "name": "Community",
       "icon": "slack",
       "url": "https://join.slack.com/t/graphy-community"
     },
@@ -50,16 +51,11 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": [
-        "quickstart"
-      ]
+      "pages": ["quickstart"]
     },
     {
-      "group": "Core Components", 
-      "pages": [
-        "visualisation-provider",
-        "visualisation-controller"
-      ]
+      "group": "Core Components",
+      "pages": ["visualisation-provider", "visualisation-controller"]
     },
     {
       "group": "Schemas & Types",
